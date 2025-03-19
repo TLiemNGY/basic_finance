@@ -24,7 +24,7 @@ def calculate_linear_regression(df, lookback=520):
     initial_value = regression_line[0]  # Prix au début de la régression
     slope_percentage = (slope_raw / initial_value) * 100  # Pente en % par semaine
 
-    return regression_line.flatten(), slope_percentage  # ✅ On renvoie enfin la bonne pente
+    return regression_line.flatten(), slope_percentage
 
 def calculate_standard_deviation(df, regression_line, lookback=520):
     """Calcule l'écart type autour de la droite de régression et les niveaux ±1σ, ±2σ."""

@@ -85,10 +85,10 @@ if selected_stock:
                     y=market_regression,
                     mode="lines",
                     name=f"Régression {index_symbol}",
-                    line=dict(dash="dot", color="red")  # 🔥 Changement de pointillé
+                    line=dict(dash="dot", color="red")
                 ), row=1, col=1)
 
-        # Réintégration des indicateurs
+
         if "Standard Deviation" in indicators and regression_line is not None:
             std_dev, levels = calculate_standard_deviation(df, regression_line, lookback)
             if std_dev > 0:
@@ -99,7 +99,7 @@ if selected_stock:
                         y=value,
                         mode="lines",
                         name=f"Std Dev {level}",
-                        line=dict(dash="dashdot", color=colors[i % len(colors)])  # 🔥 Différenciation des écarts types
+                        line=dict(dash="dashdot", color=colors[i % len(colors)])
                     ), row=1, col=1)
 
         if "SMA" in indicators:
@@ -136,16 +136,15 @@ if selected_stock:
                 tickformat="%Y-%m-%d",
                 tickmode="auto",
                 rangeslider_visible=False,
-                showticklabels=True  # 🔥 Assurer que les dates s'affichent en bas
+                showticklabels=True
             ),
-            xaxis2=dict(showticklabels=False),  # 🔥 Suppression des dates sous le RSI uniquement
+            xaxis2=dict(showticklabels=False),
             yaxis_title="Prix",
             height=800
         )
 
         st.plotly_chart(fig, use_container_width=True)
 
-        # 🔥 Rajout sobre des valeurs des pentes
         st.sidebar.markdown("### 📉 **Pentes des régressions linéaires**")
         if slope is not None:
             yearly_growth = (1 + slope / 100) ** 52 - 1
