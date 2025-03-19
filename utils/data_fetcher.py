@@ -1,32 +1,38 @@
 import yfinance as yf
 import pandas as pd
+import numpy as np
 
-def fetch_stock_data(stock_symbol, interval="1d"):
-    """Récupère tout l'historique disponible et filtre les 10 dernières années."""
+def fetch_stock_data(stock_symbol, interval="1wk"):
     stock = yf.Ticker(stock_symbol)
     df = stock.history(period="max", interval=interval)
 
-    # Vérifier si les données existent
     if not df.empty:
-        df.index = df.index.tz_localize(None)  # Supprime le fuseau horaire
-        df = df[df.index >= (pd.Timestamp.now() - pd.DateOffset(years=10))]  # Filtrage 10 ans
+        df.index = df.index.tz_localize(None)
+        df = df[df.index >= (pd.Timestamp.now() - pd.DateOffset(years=10))]
 
     return df
 
 def get_stock_suggestions(query):
-    """Renvoie une liste d'actions ou indices correspondant à la recherche."""
+    query = query.upper()
+    suggestions = []
 
-    # Essayer de récupérer directement l'actif via Yahoo Finance
     try:
         search_results = yf.Ticker(query)
         if search_results.history(period="1d").empty is False:
-            return [query.upper()]  # Si valide, renvoie directement
+            return [query]
     except:
-        pass  # Ignore les erreurs si l'actif n'est pas trouvé
+        pass
 
-    # Si pas trouvé, utiliser la liste du S&P 500
-    try:
-        tickers = pd.read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")[0]["Symbol"].tolist()
-        return [t for t in tickers if query.upper() in t.upper()][:10]
-    except:
-        return []  # Si problème, retourne une liste vide
+    return suggestions
+
+def fetch_index_regression(index_symbol):
+    df = fetch_stock_data(index_symbol, "1wk")
+
+    if df is not None and not df.empty:
+        prices = df["Close"].dropna()
+        x = np.arange(len(prices))
+        coef = np.polyfit(x, prices.values, 1)
+        regression_line = np.poly1d(coef)(x)
+        return pd.Series(regression_line, index=df.index)
+
+    return None
