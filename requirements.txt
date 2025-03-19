@@ -1,8 +1,5 @@
 streamlit
-yfinance
+matplotlib
 numpy
-pandas
-plotly
-scikit-learn
-lxml
-yahooquery
+yfinance
+requests
