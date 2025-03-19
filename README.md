@@ -1,18 +1,40 @@
-# Finance Dashboard
+# Basic Finance
 
-Un tableau de bord interactif en Python utilisant **Streamlit**, **yFinance**, et **Plotly** pour afficher les données boursières avec des indicateurs techniques comme la régression linéaire et l'écart type.
+## Description
 
-## Fonctionnalités
+Basic Finance est une application permettant de gérer et d’analyser des données financières de manière simple et efficace.
 
-- Sélection dynamique d'une action avec une liste déroulante intelligente  
-- Graphique interactif des prix (zoom, déplacement)  
-- Sélection de la période (Daily, Weekly, Monthly)  
-- Indicateurs techniques :
-  - Linear Regression : Droite de régression avec pente  
-  - Standard Deviation : Écart-type avec niveaux 1σ, 2σ, 3σ  
-  - Market Linear Regression (future amélioration)  
 
----
+## Installation
+1. Assurez-vous d'avoir Python 3.11 installé sur votre système.
+2. Si vous n'avez pas encore d'environnement virtuel pour ce projet, créez-en un avec la commande suivante
+Windows :
+   ```bash
+   py -3.11 -m venv .venv
+   ```
 
-## Structure du projet
+Mac :
+   ```bash
+   python3 -m venv .venv
+   ```
+
+3. Activez l'environnement virtuel :
+   - Sous macOS/Linux :
+     ```bash
+     source .venv/bin/activate
+     ```
+   - Sous Windows :
+     ```bash
+     source .venv/Scripts/activate
+     ```
+4. Installez les dépendances requises :
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+## Utilisation
+```bash
+   streamlit run app.py
+```
+
 

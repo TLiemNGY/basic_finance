@@ -2,32 +2,48 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 
-def calculate_linear_regression(df):
-    """Calcule la droite de régression linéaire et retourne sa pente."""
-    df = df.reset_index()
-    df["Timestamp"] = df["Date"].astype(np.int64) // 10**9  # Conversion de la date en timestamp
 
-    X = df["Timestamp"].values.reshape(-1, 1)
-    y = df["Close"].values.reshape(-1, 1)
+def calculate_linear_regression(df, lookback=2520):
+    """Calcule une droite de régression sur les X derniers jours."""
+
+    if len(df) < lookback:
+        lookback = len(df)  # Si on a moins de données que lookback, on prend tout
+
+    df_recent = df.iloc[-lookback:]  # On garde seulement les X dernières valeurs
+
+    X = np.arange(len(df_recent)).reshape(-1, 1)  # Index des jours
+    y = df_recent["Close"].values  # Prix de clôture
+
+    if len(X) < 2:  # Vérification : impossible de faire une régression avec 1 seul point
+        return np.array([]), 0
 
     model = LinearRegression()
     model.fit(X, y)
-    y_pred = model.predict(X)
-    slope = model.coef_[0][0]
 
-    return y_pred.flatten(), slope
+    regression_line = model.predict(X)  # Droite prédite
+    slope = float(model.coef_[0])  # Convertir en float standard
 
-def calculate_standard_deviation(df):
-    """Calcule l'écart type et les niveaux 1σ, 2σ, 3σ autour du prix moyen."""
-    mean_price = df["Close"].mean()
-    std_dev = df["Close"].std()
+    return regression_line.flatten(), slope
+
+
+def calculate_standard_deviation(df, regression_line, lookback=2520):
+    """Calcule l'écart type autour de la droite de régression et les niveaux ±1σ, ±2σ."""
+
+    if len(df) < lookback:
+        lookback = len(df)
+
+    df_recent = df.iloc[-lookback:]  # Prend les X derniers jours
+
+    # Calcul de l'écart type par rapport à la droite de régression
+    residuals = df_recent["Close"] - regression_line  # Différences entre prix et droite
+    std_dev = np.std(residuals)  # Écart type des résidus
 
     levels = {
-        "+1σ": mean_price + std_dev,
-        "-1σ": mean_price - std_dev,
-        "+2σ": mean_price + 2*std_dev,
-        "-2σ": mean_price - 2*std_dev,
-        "+3σ": mean_price + 3*std_dev,
-        "-3σ": mean_price - 3*std_dev,
+        "+1σ": regression_line + std_dev,
+        "-1σ": regression_line - std_dev,
+        "+2σ": regression_line + 2 * std_dev,
+        "-2σ": regression_line - 2 * std_dev,
     }
+
     return std_dev, levels
+
