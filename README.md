@@ -39,5 +39,3 @@ Mac :
 ```bash
    streamlit run app.py
 ```
-Enjoy
-
