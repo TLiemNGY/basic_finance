@@ -1,0 +1,3 @@
+Mettre des couleurs - flashy pour les écarts type
+Recalculer la Market Linear Regression pour la crypto, le marché américain
+Changer la couleur de la Linear Regression - pas la meme que la SMA 50
