@@ -41,6 +41,9 @@ def calculate_standard_deviation(df, regression_line, lookback=520):
         "-1σ": regression_line - std_dev,
         "+2σ": regression_line + 2 * std_dev,
         "-2σ": regression_line - 2 * std_dev,
+        "+3σ": regression_line + 3 * std_dev,
+        "-3σ": regression_line - 3 * std_dev,
+
     }
 
     return std_dev, levels
@@ -52,7 +55,7 @@ def calculate_sma(df):
     return sma_50, sma_200
 
 def calculate_rsi(df, period=14):
-    """Calcule le RSI (Relative Strength Index)."""
+    """Calcule le RSI (Relative Strength Index).""" # Recalculer le RSI
     delta = df["Close"].diff()
     gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
     loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()

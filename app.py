@@ -92,14 +92,14 @@ if selected_stock:
         if "Standard Deviation" in indicators and regression_line is not None:
             std_dev, levels = calculate_standard_deviation(df, regression_line, lookback)
             if std_dev > 0:
-                colors = ["cyan", "yellow", "red", "green"]
+                colors = ["orange", "orange", "purple", "purple", "lightblue", "lightblue"]
                 for i, (level, value) in enumerate(levels.items()):
                     fig.add_trace(go.Scatter(
                         x=df.index[-lookback:],
                         y=value,
                         mode="lines",
                         name=f"Std Dev {level}",
-                        line=dict(dash="dashdot", color=colors[i % len(colors)])
+                        line=dict(dash="dot", color=colors[i % len(colors)])
                     ), row=1, col=1)
 
         if "SMA" in indicators:
