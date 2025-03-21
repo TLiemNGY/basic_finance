@@ -62,15 +62,20 @@ if selected_stock:
         regression_line, slope = None, None
         market_regression, market_slope = None, None
 
+        lookback_end = st.sidebar.slider("Exclure les X dernières semaines", 0, lookback, 0, 10)
+
         if "Linear Regression" in indicators:
-            regression_line, slope = calculate_linear_regression(df, lookback)
+            start_idx = -lookback
+            end_idx = -lookback_end if lookback_end > 0 else None  # Si 0, prend toute la période
+            regression_line, slope = calculate_linear_regression(df.iloc[start_idx:end_idx])
+
             if regression_line.size > 0:
                 fig.add_trace(go.Scatter(
-                    x=df.index[-lookback:],
+                    x=df.index[start_idx:end_idx],
                     y=regression_line,
                     mode="lines",
                     name="Régression de l'actif",
-                    line=dict(dash="dash", color="blue")
+                    line=dict(dash="dash", color="darkblue")
                 ), row=1, col=1)
 
         if "Market Linear Regression" in indicators and index_data is not None:
@@ -92,7 +97,7 @@ if selected_stock:
         if "Standard Deviation" in indicators and regression_line is not None:
             std_dev, levels = calculate_standard_deviation(df, regression_line, lookback)
             if std_dev > 0:
-                colors = ["orange", "orange", "purple", "purple", "lightblue", "lightblue"]
+                colors = ["sandybrown", "sandybrown", "mediumpurple", "mediumpurple", "lightblue", "lightblue"]
                 for i, (level, value) in enumerate(levels.items()):
                     fig.add_trace(go.Scatter(
                         x=df.index[-lookback:],
