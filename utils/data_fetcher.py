@@ -8,7 +8,7 @@ def fetch_stock_data(stock_symbol, interval="1wk"):
 
     if not df.empty:
         df.index = df.index.tz_localize(None)
-        df = df[df.index >= (pd.Timestamp.now() - pd.DateOffset(years=10))]
+        df = df[df.index >= (pd.Timestamp.now() - pd.DateOffset(years=15))]
 
     return df
 
