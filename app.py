@@ -14,52 +14,54 @@ st.set_page_config(page_title="Finance Dashboard", layout="wide")
 
 FAV_PATH = "favorites.json"
 
+
 def load_favorites():
     if os.path.exists(FAV_PATH):
         with open(FAV_PATH, "r") as f:
             return json.load(f)
     return []
 
+
 def save_favorites(favs):
     with open(FAV_PATH, "w") as f:
         json.dump(favs, f, indent=2)
 
+
 # Sidebar : Sélection de l'actif avec recherche améliorée
 st.sidebar.title("Sélection de l'actif")
 query = st.sidebar.text_input("Tapez le nom ou le ticker d'une action ou crypto")
-stock_list = get_stock_suggestions(query) if query else []
 favorites = load_favorites()
+stock_list = get_stock_suggestions(query) if query else []
 
-# Section Recherche
-st.sidebar.markdown("### Recherche d'un actif")
-selected_stock = st.sidebar.selectbox("Choisissez un actif", stock_list, index=0) if stock_list else fav_choice
+selected_stock = None
+
+if stock_list:
+    selected_stock = st.sidebar.selectbox("Résultats de recherche", stock_list)
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### Ou choisissez un favori")
+elif favorites:
+    selected_stock = st.sidebar.selectbox("Mes favoris", favorites)
+else:
+    st.sidebar.info("Aucun actif sélectionné.")
 
 st.sidebar.markdown("---")
-# Section Favoris
-st.sidebar.markdown("### Mes favoris")
-if favorites:
-    fav_choice = st.sidebar.selectbox("Choisissez un favori", favorites)
-    selected_stock = fav_choice
-else:
-    fav_choice = None
-
 
 # Indicateurs sélectionnables
-indicators = st.sidebar.multiselect("Indicateurs", ["Linear Regression", "Market Linear Regression", "Standard Deviation", "SMA", "RSI"])
+indicators = st.sidebar.multiselect("Indicateurs", ["Linear Regression", "Standard Deviation", "SMA", "RSI"])
 
 st.sidebar.markdown("---")
 if selected_stock:
     st.sidebar.markdown("### ⭐ Gestion des favoris")
     if selected_stock in favorites:
-        if st.sidebar.button("Retirer des favoris ❌"):
+        if st.sidebar.button("❌ Retirer des favoris"):
             favorites.remove(selected_stock)
             save_favorites(favorites)
-
+            st.rerun()
     else:
-        if st.sidebar.button("Ajouter aux favoris ✅"):
+        if st.sidebar.button("✅ Ajouter aux favoris"):
             favorites.append(selected_stock)
             save_favorites(favorites)
-
+            st.rerun()
 
     is_crypto = "-USD" in selected_stock
     is_european = selected_stock.endswith(".PA")
@@ -109,20 +111,6 @@ if selected_stock:
                 line=dict(dash="dash", color="darkblue")
             ), row=1, col=1)
 
-        if "Market Linear Regression" in indicators and index_data is not None:
-            market_regression, market_slope = calculate_linear_regression(index_data, lookback)
-            if regression_line is not None:
-                start_point = regression_line[0]
-                market_regression = start_point + np.arange(len(regression_line)) * market_slope
-
-                fig.add_trace(go.Scatter(
-                    x=index_data.index[-len(regression_line):],
-                    y=market_regression,
-                    mode="lines",
-                    name=f"Régression {index_symbol}",
-                    line=dict(dash="dot", color="red")
-                ), row=1, col=1)
-
         if "Standard Deviation" in indicators and regression_line is not None:
             std_dev, levels = calculate_standard_deviation(df_regression, regression_line, len(df_regression))
             if std_dev > 0:
@@ -133,7 +121,7 @@ if selected_stock:
                         y=value,
                         mode="lines",
                         name=f"Std Dev {level}",
-                        line=dict(dash="dot", color=colors[i % len(colors)])
+                        line=dict(dash="dot", color=colors[i % len(colors)], width=1)
                     ), row=1, col=1)
 
         if "SMA" in indicators:
@@ -182,20 +170,34 @@ if selected_stock:
         st.sidebar.markdown("---")
         st.sidebar.markdown("### **Pentes des régressions linéaires**")
 
-        if slope is not None and regression_line is not None:
+        if regression_line is not None:
             start_price = regression_line[0]
             end_price = regression_line[-1]
             years = lookback / 52
-            growth_ratio = (end_price / start_price) ** (1 / years) - 1 if start_price > 0 else 0
-            st.sidebar.write(f"**Pente de l'actif** : {slope:.5f}")
-            st.sidebar.write(f"Croissance estimée : {growth_ratio * 100:.2f}% par an.")
+            cagr_asset = (end_price / start_price) ** (1 / years) - 1 if start_price > 0 else 0
+            st.sidebar.write(f"**📈 Croissance annualisée de l’actif** : {cagr_asset * 100:.2f}%")
 
-        if market_slope is not None and market_regression is not None:
-            start_market = market_regression[0]
-            end_market = market_regression[-1]
-            market_growth = (end_market / start_market) ** (1 / years) - 1 if start_market > 0 else 0
-            st.sidebar.write(f"📉 **Pente du marché** : {market_slope:.5f}")
-            st.sidebar.write(f"📈 Croissance estimée du marché : {market_growth * 100:.2f}% par an.")
+            # Comparaison avec le marché
+            index_symbol = "BTC-USD" if is_crypto else ("^FCHI" if is_european else "^GSPC")
+            index_data = fetch_index_regression(index_symbol)
+
+            if index_data is not None:
+                index_regression = index_data.loc[df_regression.index.min():df_regression.index.max()]
+                if not index_regression.empty and len(index_regression) == len(df_regression):
+                    market_start = index_regression.iloc[0]
+                    market_end = index_regression.iloc[-1]
+                    cagr_market = (market_end / market_start) ** (1 / years) - 1 if market_start > 0 else 0
+                    st.sidebar.write(
+                        f"**📉 Croissance annualisée du marché ({index_symbol})** : {cagr_market * 100:.2f}%")
+                    st.sidebar.markdown("📊 _Comparaison avec la dynamique de marché_")
+                    if cagr_asset > cagr_market:
+                        st.sidebar.markdown(
+                            f"✅ Si l’actif avait suivi la dynamique du {index_symbol}, sa croissance aurait été de **+{cagr_market * 100:.2f}%/an** au lieu de **+{cagr_asset * 100:.2f}%/an**.")
+                    elif cagr_asset < cagr_market:
+                        st.sidebar.markdown(
+                            f"⚠️ Si l’actif avait suivi la dynamique du {index_symbol}, sa croissance aurait été de **+{cagr_market * 100:.2f}%/an** au lieu de **+{cagr_asset * 100:.2f}%/an**.")
+                    else:
+                        st.sidebar.markdown(f"📊 L’actif a exactement suivi la même croissance que le {index_symbol}.")
 
 st.sidebar.markdown("---")
 
@@ -207,4 +209,3 @@ st.sidebar.markdown(
     "- **Si SMA 50 passe au-dessus de SMA 200** → **Signal haussier**.\n"
     "- **Si SMA 50 passe sous SMA 200** → **Signal baissier**."
 )
-
