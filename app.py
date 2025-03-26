@@ -68,6 +68,10 @@ if selected_stock:
     is_us = not is_crypto and not is_european
 
     df = fetch_stock_data(selected_stock, "1wk")
+
+    #fill NA to avoid BTC error in growth computation
+    df = df.fillna(method="ffill").dropna(subset=["Close"])
+
     st.sidebar.markdown("---")
     if not df.empty:
         max_lookback = min(780, len(df))
