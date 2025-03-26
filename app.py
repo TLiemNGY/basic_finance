@@ -168,7 +168,6 @@ if selected_stock:
         st.plotly_chart(fig, use_container_width=True)
 
         st.sidebar.markdown("---")
-        st.sidebar.markdown("### **Pentes des régressions linéaires**")
 
         if regression_line is not None:
             start_price = regression_line[0]
@@ -189,15 +188,14 @@ if selected_stock:
                     cagr_market = (market_end / market_start) ** (1 / years) - 1 if market_start > 0 else 0
                     st.sidebar.write(
                         f"**📉 Croissance annualisée du marché ({index_symbol})** : {cagr_market * 100:.2f}%")
-                    st.sidebar.markdown("📊 _Comparaison avec la dynamique de marché_")
                     if cagr_asset > cagr_market:
                         st.sidebar.markdown(
-                            f"✅ Si l’actif avait suivi la dynamique du {index_symbol}, sa croissance aurait été de **+{cagr_market * 100:.2f}%/an** au lieu de **+{cagr_asset * 100:.2f}%/an**.")
+                            f"Si l’actif avait suivi la dynamique du {index_symbol}, sa croissance aurait été de **+{cagr_market * 100:.2f}%/an** au lieu de **+{cagr_asset * 100:.2f}%/an**.")
                     elif cagr_asset < cagr_market:
                         st.sidebar.markdown(
-                            f"⚠️ Si l’actif avait suivi la dynamique du {index_symbol}, sa croissance aurait été de **+{cagr_market * 100:.2f}%/an** au lieu de **+{cagr_asset * 100:.2f}%/an**.")
+                            f"Si l’actif avait suivi la dynamique du {index_symbol}, sa croissance aurait été de **+{cagr_market * 100:.2f}%/an** au lieu de **+{cagr_asset * 100:.2f}%/an**.")
                     else:
-                        st.sidebar.markdown(f"📊 L’actif a exactement suivi la même croissance que le {index_symbol}.")
+                        st.sidebar.markdown(f"L’actif a exactement suivi la même croissance que le {index_symbol}.")
 
 st.sidebar.markdown("---")
 
