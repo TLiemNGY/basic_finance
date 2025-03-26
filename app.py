@@ -77,7 +77,8 @@ if selected_stock:
         lookback_end = lookback
 
         # Déterminer l’indice de référence
-        index_symbol = "BTC-USD" if is_crypto else ("^FCHI" if is_european else "^GSPC")
+        index_symbol = "^GSPC"
+        # index_symbol = "BTC-USD" if is_crypto else ("^FCHI" if is_european else "^GSPC")
         index_data = fetch_index_regression(index_symbol) if "Market Linear Regression" in indicators else None
 
         if index_data is not None and isinstance(index_data, pd.Series):
@@ -177,7 +178,8 @@ if selected_stock:
             st.sidebar.write(f"**📈 Croissance annualisée de l’actif** : {cagr_asset * 100:.2f}%")
 
             # Comparaison avec le marché
-            index_symbol = "BTC-USD" if is_crypto else ("^FCHI" if is_european else "^GSPC")
+            index_symbol = "^GSPC"
+            # index_symbol = "BTC-USD" if is_crypto else ("^FCHI" if is_european else "^GSPC")
             index_data = fetch_index_regression(index_symbol)
 
             if index_data is not None:
